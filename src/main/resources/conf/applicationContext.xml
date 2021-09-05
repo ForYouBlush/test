@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
+    <!--用来创建service、dao对象-->
+    <!--注册组件扫描器-->
+    <context:component-scan base-package="com.study.crm.settings.service"/>
+    <context:component-scan base-package="com.study.crm.workbench.service"/>
+    <!--声明jdbc配置文件-->
+    <context:property-placeholder location="classpath:conf/jdbc.properties" />
+    <!--声明数据源，连接数据库-->
+    <bean class="com.alibaba.druid.pool.DruidDataSource" id="dataSource"
+          init-method="init" destroy-method="close">
+        <property name="url" value="${mysql.url}" />
+        <property name="username" value="${mysql.username}"/>
+        <property name="password" value="${mysql.password}" />
+    </bean>
+    <!--声明SqlSessionFactoryBean对象，-->
+    <bean class="org.mybatis.spring.SqlSessionFactoryBean" id="sqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="configLocation" value="classpath:conf/mybatis.xml"/>
+    </bean>
+    <!--声明mybatis的扫描器，创建dao对象-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactoryBean" />
+        <property name="basePackage" value="com.study.crm.settings.dao
+        com.study.crm.workbench.dao"/>
+    </bean>
+    <!--事务配置：注解的配置，aspectj的配置-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!--事务通知，切面-->
+    <tx:advice id="interceptor" transaction-manager="transactionManager">
+<tx:attributes>
+    <tx:method name="save" propagation="REQUIRED" rollback-for="*" isolation="DEFAULT"/>
+</tx:attributes>
+    </tx:advice>
+    <!--aop配置，通知应用的切入点，织入给谁-->
+    <aop:config>
+        <aop:pointcut id="servicePt" expression="execution(* *..service..*(..))"/>
+        <!--声明器增强，通知和切入点的结合-->
+        <aop:advisor advice-ref="interceptor" pointcut-ref="servicePt"/>
+    </aop:config>
+</beans>

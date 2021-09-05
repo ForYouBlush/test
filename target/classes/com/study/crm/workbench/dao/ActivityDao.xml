@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.study.crm.workbench.dao.ActivityDao">
+    <select id="getDetail" resultType="Activity">
+        select
+        a.id,
+        u.name owner,
+        a.name,
+        a.startDate,
+        a.endDate,
+        a.cost,
+        a.description,
+        a.createTime,
+        a.createBy,
+        a.editTime,
+        a.editBy
+
+        from tbl_activity a
+        join tbl_user u
+        on a.owner=u.id
+        where a.id=#{id}
+    </select>
+
+
+<insert id="saveActivity">
+    insert into tbl_activity(id,
+  owner,
+  name,
+  startDate,
+  endDate,
+  cost,
+  description,
+  createTime,
+  createBy)
+   values (
+  #{id},
+  #{owner},
+  #{name},
+  #{startDate},
+  #{endDate},
+  #{cost},
+  #{description},
+  #{createTime},
+  #{createBy}
+    )
+</insert>
+    <update id="updateActivity">
+        update tbl_activity set owner=#{owner},name=#{name},startDate=#{startDate},endDate=#{endDate},
+        cost=#{cost},description=#{description},editTime=#{editTime},editBy=#{editBy} where id=#{id}
+    </update>
+
+
+    <select id="getTotalByCondition" parameterType="map" resultType="int">
+    select count(*)
+    from tbl_activity a
+        join tbl_user u
+        on a.owner=u.id
+        <where>
+            <if test="activity.name!=null and activity.name!=''">
+                a.name like '%' #{activity.name} '%'
+            </if>
+            <if test="activity.owner!=null and activity.owner!=''">
+                and u.name like '%' #{activity.owner} '%'
+            </if>
+            <if test="activity.startDate!=null and activity.startDate!=''">
+                and startDate &gt; #{activity.startDate}
+            </if>
+            <if test="activity.endDate!=null and activity.endDate!=''">
+                and endDate &lt; #{activity.endDate}
+            </if>
+        </where>
+    </select>
+    <select id="getActivityListByCondition" parameterType="map" resultType="Activity">
+        select
+        a.id,
+        a.name,
+        u.name owner,
+        a.startDate,
+        a.endDate
+        from tbl_activity a
+        join tbl_user u
+        on a.owner=u.id
+        <where>
+            <if test="activity.name!=null and activity.name!=''">
+                a.name like '%' #{activity.name} '%'
+            </if>
+            <if test="activity.owner!=null and activity.owner!=''">
+                and u.name like '%' #{activity.owner} '%'
+            </if>
+            <if test="activity.startDate!=null and activity.startDate!=''">
+                and startDate &gt; #{activity.startDate}
+            </if>
+            <if test="activity.endDate!=null and activity.endDate!=''">
+                and endDate &lt; #{activity.endDate}
+            </if>
+        </where>
+        order by a.createTime desc
+        limit #{skipNum},#{pageSize}
+    </select>
+    <delete id="deleteByid">
+        delete  from tbl_activity
+        where id in
+        <foreach collection="array" item="id" close=")" separator="," open="(">
+            #{id}
+        </foreach>
+    </delete>
+    <select id="getActivityById" resultType="Activity">
+        select * from tbl_activity where id=#{id}
+    </select>
+
+
+    <select id="showActivityNotInClueId" resultType="Activity">
+        select
+        a.id,
+        a.name,
+        a.startDate,
+        a.endDate,
+        u.name owner
+        from tbl_activity a
+        join tbl_user u
+        on a.owner=u.id
+        where a.id not in(
+        select
+        activityId
+        from tbl_clue_activity_relation
+        where clueId=#{id}
+        )
+    </select>
+    <select id="showActivityByNameNotInClueId" resultType="Activity">
+         select
+        a.id,
+        a.name,
+        a.startDate,
+        a.endDate,
+        u.name owner
+        from tbl_activity a
+        join tbl_user u
+        on a.owner=u.id
+        where a.name like '%' #{name} '%' and a.id not in(
+        select
+        activityId
+        from tbl_clue_activity_relation
+        where clueId=#{cid}
+        )
+    </select>
+
+    <select id="getAll" resultType="Activity">
+        select * from tbl_activity
+    </select>
+
+
+    <select id="getActivityListByName" resultType="Activity">
+        select * from tbl_activity where name like '%' #{name} '%'
+    </select>
+
+    <select id="showActivityList" resultType="Activity">
+        select
+        a.id,
+        a.name,
+        a.startDate,
+        a.endDate,
+        u.name owner
+        from tbl_activity a
+        join tbl_user u
+        on a.owner=u.id
+    </select>
+    <select id="getActivityListLikeName" resultType="Activity">
+         select
+        a.id,
+        a.name,
+        a.startDate,
+        a.endDate,
+        u.name owner
+        from tbl_activity a
+        join tbl_user u
+        on a.owner=u.id
+        where  a.name like '%' #{name} '%'
+    </select>
+</mapper>

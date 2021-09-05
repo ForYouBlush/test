@@ -1,0 +1,32 @@
+ $.ajax({
+                    url:"",
+                    data:{
+
+                    },
+                    type:"",
+                    dataType:"",
+                    success:function (data) {
+
+                    }
+                })
+
+
+
+ $(".time").datetimepicker({
+                minView: "month",
+                language:  'zh-CN',
+                format: 'yyyy-mm-dd',
+                autoclose: true,
+                todayBtn: true,
+                pickerPosition: "bottom-left"
+            });
+
+
+  pageList($("#activityPage").bs_pagination('getOption', 'currentPage')
+                                    ,$("#activityPage").bs_pagination('getOption', 'rowsPerPage'));
+
+
+
+
+clue.setEditBy(((User)request.getSession().getAttribute("user")).getName());
+        clue.setEditTime(DateTimeUtil.getSysTime());
